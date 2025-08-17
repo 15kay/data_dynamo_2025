@@ -262,19 +262,7 @@ def show_predictions(predictor, data):
     """Show predictions page"""
     st.markdown('<h2 class="sub-header">🔮 Protest Risk Predictions</h2>', unsafe_allow_html=True)
     
-    # Prediction level selector
-    prediction_level = st.selectbox(
-        "Select Prediction Level:",
-        ["🗺️ Provincial Level", "🏘️ Municipal Level"]
-    )
-    
-    if prediction_level == "🗺️ Provincial Level":
-        show_provincial_predictions(predictor, data)
-    else:
-        show_municipal_predictions(predictor, data)
-
-def show_provincial_predictions(predictor, data):
-    """Show provincial predictions"""
+    # Provincial predictions
     st.markdown("### 🗺️ Provincial Risk Assessment")
     
     provinces = data['Province'].unique()
@@ -358,95 +346,96 @@ def show_provincial_predictions(predictor, data):
     fig.update_layout(height=500)
     st.plotly_chart(fig, use_container_width=True)
 
-def show_municipal_predictions(predictor, data):
-    """Show municipality-level predictions"""
-    st.markdown("### 🏘️ Municipal Risk Assessment")
+def show_provincial_analysis(predictor, data):
+    """Show detailed provincial analysis"""
+    st.markdown('<h2 class="sub-header">📊 Provincial Deep Dive</h2>', unsafe_allow_html=True)
     
-    # Province filter
+    # Province selector
     selected_province = st.selectbox(
-        "Select Province for Municipal Analysis:",
+        "Select a province for detailed analysis:",
         data['Province'].unique()
     )
     
-    # Filter municipalities by province
-    municipal_data = data[data['Province'] == selected_province]
+    province_data = data[data['Province'] == selected_province].iloc[0]
     
-    if 'Municipality' in municipal_data.columns:
-        municipalities = municipal_data['Municipality'].unique()
-        
-        municipal_predictions = []
-        
-        for municipality in municipalities:
-            # Get municipality data
-            muni_data = municipal_data[municipal_data['Municipality'] == municipality]
-            if not muni_data.empty:
-                # Calculate risk for municipality
-                risk = predictor.predict_protest_risk(municipality_data=muni_data.iloc[0])
-                if risk is not None:
-                    municipal_predictions.append({
-                        'Municipality': municipality,
-                        'Province': selected_province,
-                        'Predicted_Risk': risk,
-                        'Population': muni_data.iloc[0].get('Total_Population', 0),
-                        'Service_Index': muni_data.iloc[0].get('Service_Delivery_Index', 0)
-                    })
-        
-        if municipal_predictions:
-            muni_pred_df = pd.DataFrame(municipal_predictions).sort_values('Predicted_Risk', ascending=False)
-            
-            # Risk classification
-            def classify_risk(risk):
-                if risk >= 7:
-                    return 'High', '#f44336'
-                elif risk >= 4:
-                    return 'Medium', '#ff9800'
-                else:
-                    return 'Low', '#4caf50'
-            
-            muni_pred_df['Risk_Level'], muni_pred_df['Color'] = zip(*muni_pred_df['Predicted_Risk'].apply(classify_risk))
-            
-            # Municipal risk visualization
-            fig = px.scatter(
-                muni_pred_df,
-                x='Service_Index',
-                y='Predicted_Risk',
-                size='Population',
-                color='Risk_Level',
-                hover_name='Municipality',
-                title=f"Municipal Protest Risk in {selected_province}",
-                labels={
-                    'Service_Index': 'Service Delivery Index (%)',
-                    'Predicted_Risk': 'Predicted Risk Score'
-                },
-                color_discrete_map={'High': '#f44336', 'Medium': '#ff9800', 'Low': '#4caf50'}
-            )
-            fig.update_layout(height=500)
-            st.plotly_chart(fig, use_container_width=True)
-            
-            # Top risk municipalities table
-            st.markdown("### 🚨 Highest Risk Municipalities")
-            top_risk = muni_pred_df.head(10)[['Municipality', 'Predicted_Risk', 'Risk_Level', 'Service_Index', 'Population']]
-            st.dataframe(top_risk, use_container_width=True)
-            
-            # Municipal comparison
-            st.markdown("### 📊 Municipal Risk Distribution")
-            
-            col1, col2, col3 = st.columns(3)
-            
-            high_risk_count = len(muni_pred_df[muni_pred_df['Risk_Level'] == 'High'])
-            medium_risk_count = len(muni_pred_df[muni_pred_df['Risk_Level'] == 'Medium'])
-            low_risk_count = len(muni_pred_df[muni_pred_df['Risk_Level'] == 'Low'])
-            
-            with col1:
-                st.metric("🔴 High Risk", high_risk_count)
-            with col2:
-                st.metric("🟡 Medium Risk", medium_risk_count)
-            with col3:
-                st.metric("🟢 Low Risk", low_risk_count)
-        else:
-            st.warning("No municipal data available for predictions.")
-    else:
-        st.error("Municipality column not found in dataset.")
+    # Province overview
+    st.markdown(f"### 🏛️ {selected_province} Overview")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("Population", f"{province_data['Total_Population']:,.0f}")
+    
+    with col2:
+        st.metric("Service Delivery Index", f"{province_data['Service_Delivery_Index']:.1f}%")
+    
+    with col3:
+        st.metric("Service Gap", f"{province_data['Service_Gap']:.1f}%")
+    
+    with col4:
+        risk = predictor.predict_protest_risk(province_name=selected_province)
+        st.metric("Predicted Risk", f"{risk:.2f}" if risk else "N/A")
+    
+    # Service delivery breakdown
+    st.markdown("### 🔧 Service Delivery Breakdown")
+    
+    services = {
+        'Water Access': province_data.get('Water_Access_Pct', 0),
+        'Sanitation': province_data.get('Sanitation_Pct', 0),
+        'Electricity': province_data.get('Electricity_Pct', 0),
+        'Refuse Collection': province_data.get('Refuse_Service_Pct', 0)
+    }
+    
+    fig = go.Figure(data=[
+        go.Bar(
+            x=list(services.keys()),
+            y=list(services.values()),
+            marker_color=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
+        )
+    ])
+    
+    fig.update_layout(
+        title=f"Service Delivery Indicators - {selected_province}",
+        yaxis_title="Coverage (%)",
+        height=400
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Comparison with national average
+    st.markdown("### 📊 Comparison with National Average")
+    
+    national_avg = data.groupby('Province').mean().mean()
+    
+    comparison_data = {
+        'Indicator': ['Water Access', 'Sanitation', 'Electricity', 'Refuse Collection', 'Service Index'],
+        selected_province: [
+            province_data.get('Water_Access_Pct', 0),
+            province_data.get('Sanitation_Pct', 0),
+            province_data.get('Electricity_Pct', 0),
+            province_data.get('Refuse_Service_Pct', 0),
+            province_data.get('Service_Delivery_Index', 0)
+        ],
+        'National Average': [
+            data['Water_Access_Pct'].mean(),
+            data['Sanitation_Pct'].mean(),
+            data['Electricity_Pct'].mean(),
+            data['Refuse_Service_Pct'].mean(),
+            data['Service_Delivery_Index'].mean()
+        ]
+    }
+    
+    comparison_df = pd.DataFrame(comparison_data)
+    
+    fig = px.bar(
+        comparison_df,
+        x='Indicator',
+        y=[selected_province, 'National Average'],
+        title=f"{selected_province} vs National Average",
+        barmode='group'
+    )
+    fig.update_layout(height=400)
+    st.plotly_chart(fig, use_container_width=True)
 
 def show_custom_prediction(predictor):
     """Show custom prediction interface"""
