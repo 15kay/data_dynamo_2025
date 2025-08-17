@@ -38,7 +38,7 @@ A machine learning project that predicts service delivery protest risk in South 
 
 - **Noxolo** - Team Leader
 - **Omphile** - Problem Definition Expert
-- **Onke** - Data Expert
+- **Onako** - Data Expert
 - **April** - Technical Lead
 - **Rakgadi** - Results Analyst
 - **Mosa** - Demo & Conclusions
