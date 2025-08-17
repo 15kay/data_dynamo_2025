@@ -94,7 +94,7 @@ By the end of this presentation, the audience will:
 Predicting Social Unrest Through Data Science
 
 Team Data Dynamo 2025
-Noxolo • Omphile • Onke • April • Rakgadi • Mosa
+Noxolo • Omphile • Onako • April • Rakgadi • Mosa
 
 [Institution Name]
 [Date]
@@ -119,7 +119,7 @@ Noxolo • Omphile • Onke • April • Rakgadi • Mosa
 📋 PRESENTATION AGENDA
 
 1. Problem Statement & Objectives (Omphile)
-2. Data Sources & Methodology (Onke)
+2. Data Sources & Methodology (Onako)
 3. Feature Engineering & Model Development (April)
 4. Results & Performance Analysis (Rakgadi)
 5. Interactive Dashboard Demo (Mosa)
@@ -192,7 +192,7 @@ SPECIFIC OBJECTIVES:
 ---
 
 ### Slide 5: Data Sources
-**Presenter**: Onke (2 minutes)
+**Presenter**: Onako (2 minutes)
 
 ```markdown
 📊 DATA SOURCES
@@ -231,7 +231,7 @@ SUPPLEMENTARY DATA:
 ---
 
 ### Slide 6: Methodology
-**Presenter**: Onke (2 minutes)
+**Presenter**: Onako (2 minutes)
 
 ```markdown
 🔬 METHODOLOGY
@@ -475,6 +475,7 @@ RISK DRIVERS BY PROVINCE:
 💻 INTERACTIVE DASHBOARD
 
 [LIVE DEMONSTRATION]
+https://datadynamo2025-kzbsxaarechaowg3udbdgy.streamlit.app/
 
 CORE FEATURES:
 • Real-time risk assessment
