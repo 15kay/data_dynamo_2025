@@ -469,7 +469,7 @@ RISK DRIVERS BY PROVINCE:
 ---
 
 ### Slide 12: Dashboard Demo
-**Presenter**: Mosa (3 minutes)
+**Presenter**: Noxolo (3 minutes)
 
 ```markdown
 💻 INTERACTIVE DASHBOARD
